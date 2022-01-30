@@ -16,6 +16,7 @@ public class ModMenuImplementation implements ModMenuApi {
             @Override
             protected void init() {
                 CraftingPanelScreen configScreen = new CraftingPanelScreen(MinecraftClient.getInstance().options.guiScale);
+                assert client != null;
                 client.options.guiScale = 2;
                 client.onResolutionChanged();
                 GuiBase.openGui(configScreen);

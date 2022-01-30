@@ -1,0 +1,20 @@
+{
+  "mappings": {
+    "getta/craftingpanel/mixins/InGameHudMixin": {
+      "render": "Lnet/minecraft/class_329;method_1753(Lnet/minecraft/class_4587;F)V"
+    },
+    "getta/craftingpanel/mixins/ScreenMixin": {
+      "tick": "Lnet/minecraft/class_437;method_25393()V"
+    }
+  },
+  "data": {
+    "named:intermediary": {
+      "getta/craftingpanel/mixins/InGameHudMixin": {
+        "render": "Lnet/minecraft/class_329;method_1753(Lnet/minecraft/class_4587;F)V"
+      },
+      "getta/craftingpanel/mixins/ScreenMixin": {
+        "tick": "Lnet/minecraft/class_437;method_25393()V"
+      }
+    }
+  }
+}

@@ -27,11 +27,11 @@ public class CraftingPanelItemOutput {
         this.count = count;
     }
 
-    public List<CraftingPanelItemOutput> getMaterials() {
+    public @Nullable List<CraftingPanelItemOutput> getMaterials() {
         return materials;
     }
 
-    public void setMaterials(List<CraftingPanelItemOutput> materials) {
+    public void setMaterials(@Nullable List<CraftingPanelItemOutput> materials) {
         this.materials = materials;
     }
 
@@ -40,6 +40,7 @@ public class CraftingPanelItemOutput {
     }
 
     public void addMaterial(CraftingPanelItemOutput item) {
+        assert this.materials != null;
         this.materials.add(item);
     }
 }

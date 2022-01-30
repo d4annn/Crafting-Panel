@@ -5,19 +5,15 @@ import fi.dy.masa.malilib.util.InventoryUtils;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventories;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class Utils {
 
@@ -26,9 +22,8 @@ public class Utils {
 
     public static ItemStack getItemStackFromItemCommandOutputName(String name) {
         String identifier = "minecraft:" + getItemStackName(Registry.ITEM.get(new Identifier("minecraft:" + name.replaceAll(" ", "_").toLowerCase())).getDefaultStack()).toLowerCase();
-        ItemStack itemStack = Registry.ITEM.get(new Identifier(identifier)).getDefaultStack();
 
-        return itemStack;
+        return Registry.ITEM.get(new Identifier(identifier)).getDefaultStack();
     }
 
     public static String getItemStackName(ItemStack item) {
@@ -44,8 +39,8 @@ public class Utils {
         for(CraftingPanelItemOutput item : materialList) {
 
             int total = (int)item.getCount();
-            int missing = getMissing(materialList, item, false);
-            int available = getMissing(materialList, item, true);
+            int missing = getMissing(item, false);
+            int available = getMissing(item, true);
             dump.addData(item.getName(), String.valueOf(total), String.valueOf(missing), String.valueOf(available));
         }
 
@@ -61,18 +56,18 @@ public class Utils {
         return dump;
     }
 
-    public static int getMissing(List<CraftingPanelItemOutput> list, CraftingPanelItemOutput item, boolean max) {
+    public static int getMissing(CraftingPanelItemOutput item, boolean max) {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
 
         int found = 0;
         int required = (int)item.getCount();
 
-        for(int i = 0; i < player.inventory.size(); i++) {
+        for(int i = 0; i < Objects.requireNonNull(player).getInventory().size(); i++) {
 
             if(found >= required && !max) {
                 return 0;
-            } else if (player.inventory.getStack(i).getItem() instanceof BlockItem && ((BlockItem) player.inventory.getStack(i).getItem()).getBlock() instanceof ShulkerBoxBlock) {
-                DefaultedList<ItemStack> items = InventoryUtils.getStoredItems(player.inventory.getStack(i), -1);
+            } else if (player.getInventory().getStack(i).getItem() instanceof BlockItem && ((BlockItem) player.getInventory().getStack(i).getItem()).getBlock() instanceof ShulkerBoxBlock) {
+                DefaultedList<ItemStack> items = InventoryUtils.getStoredItems(player.getInventory().getStack(i), -1);
 
                 for(ItemStack stack : items) {
 
@@ -82,8 +77,8 @@ public class Utils {
                         found += stack.getCount();
                     }
                 }
-            } else if (player.inventory.getStack(i).getItem().equals(getItemStackFromItemCommandOutputName(item.getName()).getItem())) {
-                found += player.inventory.getStack(i).getCount();
+            } else if (player.getInventory().getStack(i).getItem().equals(getItemStackFromItemCommandOutputName(item.getName()).getItem())) {
+                found += player.getInventory().getStack(i).getCount();
             }
         }
 

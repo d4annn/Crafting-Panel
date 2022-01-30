@@ -1,6 +1,5 @@
 package getta.craftingpanel.gui.widgets;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import fi.dy.masa.malilib.gui.GuiBase;
 import fi.dy.masa.malilib.gui.widgets.WidgetBase;
 import fi.dy.masa.malilib.render.RenderUtils;
@@ -12,19 +11,17 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ResultsCraftedWidget extends WidgetBase {
 
     @NotNull List<CraftingPanelItemOutput> results;
-    private int x;
-    private int y;
-    private int width;
-    private int height;
+    private final int x;
+    private final int y;
+    private final int width;
+    private final int height;
     private boolean showResults;
     private List<CraftingPanelItemOutput> currentShow = null;
 
@@ -36,7 +33,7 @@ public class ResultsCraftedWidget extends WidgetBase {
         this.width = width;
         this.height = height;
 
-        this.results = null;
+        this.results = new ArrayList<>();
         this.showResults = false;
     }
 
@@ -52,8 +49,7 @@ public class ResultsCraftedWidget extends WidgetBase {
     public void render(int mouseX, int mouseY, boolean selected, MatrixStack matrixStack) {
 
         RenderUtils.color(1f, 1f, 1f, 1f);
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(0, 0, 1);
+        matrixStack.translate(0, 0, 1);
 
         RenderUtils.drawOutlinedBox(this.x, this.y, this.width, this.height + 4, 0xA0000000, GuiBase.COLOR_HORIZONTAL_BAR);
 
@@ -99,22 +95,20 @@ public class ResultsCraftedWidget extends WidgetBase {
                 if (yQuantity + 20 >= this.height) {
 
                     yQuantity = 0;
-                    xQuantity += 22 + this.textRenderer.getWidth("x " + String.valueOf(biggest));
+                    xQuantity += 22 + this.textRenderer.getWidth("x " + (int) biggest);
                 }
                } catch (Exception ignored) {}
             }
         }
-
-        RenderSystem.popMatrix();
     }
 
     public void clearResults() {
 
-        this.results = null;
+        this.results = new ArrayList<>();
         this.showResults = false;
     }
 
-    public void recieveResults(@NotNull List<CraftingPanelItemOutput> results) {
+    public void receiveResults(@NotNull List<CraftingPanelItemOutput> results) {
 
         this.results = results;
         this.showResults = true;
