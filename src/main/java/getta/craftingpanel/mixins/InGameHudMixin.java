@@ -30,7 +30,7 @@ public class InGameHudMixin {
 
             for(CraftingPanelItemOutput item : CraftingPanel.items) {
 
-                int missing = Utils.getMissing(CraftingPanel.items, item, false);
+                int missing = Utils.getMissing(item, false);
 
                 if(missing == 0) {
 
