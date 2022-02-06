@@ -177,9 +177,10 @@ public class ItemsWidget extends WidgetBase {
             return null;
         }
 
+
         Recipe<?> finalRecipe = recipe.get();
 
-        return getIngredients(finalRecipe.getIngredients());
+         return getIngredients(finalRecipe.getIngredients());
     }
 
     //Provided by akali, he's the best
@@ -226,6 +227,8 @@ public class ItemsWidget extends WidgetBase {
 
         List<CraftingPanelItemOutput> output = new ArrayList<>();
 
+
+
         if (this.selected.isEmpty()) {
 
             CraftingPanelItemOutput item = new CraftingPanelItemOutput();
@@ -237,42 +240,34 @@ public class ItemsWidget extends WidgetBase {
                 } else {
                     quantity = Integer.parseInt(this.amountSelected.getTextField().getText());
                 }
-                int multiplier = Utils.cycle == 2 ? 3456 : 1;
-                if (Utils.cycle == 1) multiplier = 64;
-                item.setCount(quantity * multiplier);
+
+                assert MinecraftClient.getInstance().player != null;
+                Optional<? extends Recipe<?>> recipe = MinecraftClient.getInstance().player.world.getRecipeManager().get(new Identifier(this.selectedItem.getItem().toString()));
+
+                Recipe<?> finalRecipe = recipe.get();
+                int itemSort = finalRecipe.getOutput().getCount();
+
+                item.setCount(quantity);
                 item.setName(Utils.getItemStackName(this.selectedItem));
                 item.setMaterials(provideCraftFromItem(this.selectedItem.getItem()));
+                item.sort(itemSort);
                 output.add(item);
+
+
             } catch (Exception ignored) {
             }
         }
 
-        for (CraftingPanelItemOutput item : this.selected) {
+        this.selected.forEach((item) -> {
+            assert MinecraftClient.getInstance().player != null;
+            Optional<? extends Recipe<?>> recipe = MinecraftClient.getInstance().player.world.getRecipeManager().get(new Identifier(Utils.getItemStackFromItemCommandOutputName(item.getName()).getItem().toString()));
 
-            List<CraftingPanelItemOutput> listMaterials = provideCraftFromItem(Registry.ITEM.get(new Identifier("minecraft:" + item.getName().replaceAll(" ", "_").toLowerCase())));
+            Recipe<?> finalRecipe = recipe.get();
+            int itemSort = finalRecipe.getOutput().getCount();
 
-            if (listMaterials != null && !listMaterials.isEmpty()) {
-
-                float totalQuantityOfItem = item.getCount();
-
-                CraftingPanelItemOutput result = new CraftingPanelItemOutput();
-
-                int multiplier = Utils.cycle == 2 ? 3456 : 1;
-                if (Utils.cycle == 1) multiplier = 64;
-
-                result.setCount(totalQuantityOfItem * multiplier);
-                result.setName(item.getName());
-                result.setMaterials(new ArrayList<>());
-
-                for (CraftingPanelItemOutput material : listMaterials) {
-
-                    result.addMaterial(material);
-                }
-
-                output.add(result);
-            }
-        }
-
+            item.sort(itemSort);
+            output.add(item);
+        });
         return output;
     }
 
@@ -316,7 +311,6 @@ public class ItemsWidget extends WidgetBase {
             addingItem.setMaterials(provideCraftFromItem(this.selectedItem.getItem()));
             this.selected.add(addingItem);
         }
-
     }
 
 

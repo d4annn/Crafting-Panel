@@ -1,0 +1,3 @@
+v1	named	intermediary
+FIELD	getta/craftingpanel/mixins/InGameHudMixin	I	scaledHeight	field_2029
+FIELD	getta/craftingpanel/mixins/InGameHudMixin	I	scaledWidth	field_2011

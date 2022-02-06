@@ -43,4 +43,30 @@ public class CraftingPanelItemOutput {
         assert this.materials != null;
         this.materials.add(item);
     }
+
+    public void sort(int quantity) {
+        if (this.materials == null)
+            return;
+        for (CraftingPanelItemOutput item : this.materials) {
+            int number = (int) this.count / quantity;
+            System.out.println(quantity + " " + this.count);
+            if (number == 0 || number == 1) {
+                item.setCount(1);
+            } else if (number > quantity && number < quantity * 2) {
+                item.setCount(2);
+            }
+            if (number % quantity != 0) {
+                String operableNumber = String.valueOf(number);
+                if (operableNumber.length() > 1) {
+                    int lastNumber = operableNumber.charAt(operableNumber.length() - 1);
+                    lastNumber = Math.abs(quantity - lastNumber);
+                    item.setCount(lastNumber);
+                } else {
+                    item.setCount(Math.abs(number));
+                }
+            } else {
+                item.setCount(number);
+            }
+        }
+    }
 }

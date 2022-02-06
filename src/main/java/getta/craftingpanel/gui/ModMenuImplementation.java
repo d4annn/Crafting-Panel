@@ -20,6 +20,8 @@ public class ModMenuImplementation implements ModMenuApi {
                 client.options.guiScale = 2;
                 client.onResolutionChanged();
                 GuiBase.openGui(configScreen);
+                MinecraftClient.getInstance().setScreen(null);
+                GuiBase.openGui(configScreen);
             }
         };
     }
