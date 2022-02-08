@@ -227,8 +227,6 @@ public class ItemsWidget extends WidgetBase {
 
         List<CraftingPanelItemOutput> output = new ArrayList<>();
 
-
-
         if (this.selected.isEmpty()) {
 
             CraftingPanelItemOutput item = new CraftingPanelItemOutput();
@@ -241,31 +239,19 @@ public class ItemsWidget extends WidgetBase {
                     quantity = Integer.parseInt(this.amountSelected.getTextField().getText());
                 }
 
-                assert MinecraftClient.getInstance().player != null;
-                Optional<? extends Recipe<?>> recipe = MinecraftClient.getInstance().player.world.getRecipeManager().get(new Identifier(this.selectedItem.getItem().toString()));
-
-                Recipe<?> finalRecipe = recipe.get();
-                int itemSort = finalRecipe.getOutput().getCount();
-
                 item.setCount(quantity);
                 item.setName(Utils.getItemStackName(this.selectedItem));
                 item.setMaterials(provideCraftFromItem(this.selectedItem.getItem()));
-                item.sort(itemSort);
+//              item.sort(itemSort);
                 output.add(item);
 
-
-            } catch (Exception ignored) {
-            }
+            } catch (Exception ignored) {}
         }
 
         this.selected.forEach((item) -> {
-            assert MinecraftClient.getInstance().player != null;
-            Optional<? extends Recipe<?>> recipe = MinecraftClient.getInstance().player.world.getRecipeManager().get(new Identifier(Utils.getItemStackFromItemCommandOutputName(item.getName()).getItem().toString()));
-
-            Recipe<?> finalRecipe = recipe.get();
-            int itemSort = finalRecipe.getOutput().getCount();
-
-            item.sort(itemSort);
+//          item.sort(itemSort);
+            CraftingPanelItemOutput newItem = item;
+            newItem.setMaterials(provideCraftFromItem(Utils.getItemStackFromItemCommandOutputName(item.getName()).getItem()));
             output.add(item);
         });
         return output;

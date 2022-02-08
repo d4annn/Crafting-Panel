@@ -78,26 +78,27 @@ public class ResultsCraftedWidget extends WidgetBase {
                     item.setCount(item.getCount() / 64);
                 }
 
-               if(item.getCount() > biggest) {
+                if (item.getCount() > biggest) {
 
                     biggest = item.getCount();
                 }
 
                 ItemStack itemStack = Utils.getItemStackFromItemCommandOutputName(item.getName());
-               try {
-                   String amount = String.valueOf((int) item.getCount());
+                try {
+                    String amount = String.valueOf((int) item.getCount());
 
-                this.mc.getItemRenderer().renderInGui(itemStack, this.x + 7 + xQuantity, this.y + 15 + yQuantity);
-                this.textRenderer.drawWithShadow(matrixStack, "x" + amount, this.x + 30 + xQuantity, this.y + 20 + yQuantity, Color.WHITE.getRGB());
+                    this.mc.getItemRenderer().renderInGui(itemStack, this.x + 7 + xQuantity, this.y + 15 + yQuantity);
+                    this.textRenderer.drawWithShadow(matrixStack, "x" + amount, this.x + 30 + xQuantity, this.y + 20 + yQuantity, Color.WHITE.getRGB());
 
-                yQuantity += 20;
+                    yQuantity += 20;
 
-                if (yQuantity + 20 >= this.height) {
+                    if (yQuantity + 20 >= this.height) {
 
-                    yQuantity = 0;
-                    xQuantity += 22 + this.textRenderer.getWidth("x " + (int) biggest);
+                        yQuantity = 0;
+                        xQuantity += 22 + this.textRenderer.getWidth("x " + (int) biggest);
+                    }
+                } catch (Exception ignored) {
                 }
-               } catch (Exception ignored) {}
             }
         }
     }

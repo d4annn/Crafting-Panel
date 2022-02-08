@@ -49,7 +49,6 @@ public class CraftingPanelItemOutput {
             return;
         for (CraftingPanelItemOutput item : this.materials) {
             int number = (int) this.count / quantity;
-            System.out.println(quantity + " " + this.count);
             if (number == 0 || number == 1) {
                 item.setCount(1);
             } else if (number > quantity && number < quantity * 2) {
