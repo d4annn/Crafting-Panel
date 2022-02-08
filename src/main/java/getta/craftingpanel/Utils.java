@@ -130,6 +130,7 @@ public class Utils {
                         CraftingPanelItemOutput item2 = new CraftingPanelItemOutput();
                         item2.setName(recipe.getName());
                         item2.setCount(newAmount);
+                        item2.setCount(newAmount);
                         items1.add(item2);
                     }
                 }
