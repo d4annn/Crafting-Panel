@@ -4,10 +4,12 @@
   "package": "getta.craftingpanel.mixins",
   "compatibilityLevel": "JAVA_8",
   "client": [
-    "ScreenMixin",
-    "InGameHudMixin"
+    "InGameHudMixin",
+    "ScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+  ]
 }

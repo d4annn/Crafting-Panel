@@ -28,12 +28,12 @@ import java.util.List;
 public class ItemsWidget extends WidgetBase {
 
     private final TextFieldWrapper<GuiTextFieldGeneric> searchBar;
-    private TextFieldWrapper<GuiTextFieldGeneric> amountSelected;
+    private final TextFieldWrapper<GuiTextFieldGeneric> amountSelected;
     protected final GuiScrollBar scrollBar = new GuiScrollBar();
-    private int x;
-    private int y;
-    private int width;
-    private int height;
+    private final int x;
+    private final int y;
+    private final int width;
+    private final int height;
     private boolean shouldFilter;
     private List<CraftingPanelItemOutput> selected;
     private ItemStack selectedItem;
@@ -73,13 +73,7 @@ public class ItemsWidget extends WidgetBase {
 
             String textToFilter = searchBar.getTextField().getText();
 
-            if (!textToFilter.isEmpty()) {
-
-                shouldFilter = true;
-            } else {
-
-                shouldFilter = false;
-            }
+            shouldFilter = !textToFilter.isEmpty();
 
             this.scrollBar.setValue(0);
         }
@@ -90,13 +84,7 @@ public class ItemsWidget extends WidgetBase {
 
         this.tabSelected = new MouseClick(mouseX, mouseY);
 
-        if (this.searchBar.getTextField().isMouseOver(mouseX, mouseY)) {
-
-            this.searchBar.getTextField().setFocused(true);
-        } else {
-
-            this.searchBar.getTextField().setFocused(false);
-        }
+        this.searchBar.getTextField().setFocused(this.searchBar.getTextField().isMouseOver(mouseX, mouseY));
 
         if (this.amountSelected.getTextField().isMouseOver(mouseX, mouseY)) {
 
@@ -126,10 +114,6 @@ public class ItemsWidget extends WidgetBase {
         }
 
         this.searchingItem = new MouseClick(mouseX, mouseY);
-
-        int scrollBarX = this.x + this.width - this.scrollbarWidth - 1;
-        int scrollbarY = this.y + 1;
-        int scrollbarHeight = this.height - 1;
 
         if (this.scrollBar.wasMouseOver()) {
 
@@ -189,16 +173,17 @@ public class ItemsWidget extends WidgetBase {
 
         //ITEM, BLOCK, POTION, ENCHANTMENT, ENTITIES: Minecart, Boat.
 
+        assert MinecraftClient.getInstance().player != null;
         Optional<? extends Recipe<?>> recipe = MinecraftClient.getInstance().player.world.getRecipeManager().get(new Identifier(item.toString()));
         if (!recipe.isPresent()) {
 
             return null;
         }
 
-        Recipe<?> finalRecipe = recipe.get();
-        List<CraftingPanelItemOutput> itemsOfRecipe = getIngredients(finalRecipe.getIngredients());
 
-        return itemsOfRecipe;
+        Recipe<?> finalRecipe = recipe.get();
+
+        return getIngredients(finalRecipe.getIngredients());
     }
 
     //Provided by akali, he's the best
@@ -248,7 +233,7 @@ public class ItemsWidget extends WidgetBase {
         if (this.selected.isEmpty()) {
 
             CraftingPanelItemOutput item = new CraftingPanelItemOutput();
-            int quantity = 0;
+            int quantity;
 
             try {
                 if (this.amountSelected.getTextField().getText().trim().equals("")) {
@@ -256,41 +241,22 @@ public class ItemsWidget extends WidgetBase {
                 } else {
                     quantity = Integer.parseInt(this.amountSelected.getTextField().getText());
                 }
-                int multiplier = Utils.cycle == 2 ? 3456 : 1;
-                if (Utils.cycle == 1) multiplier = 64;
-                item.setCount(quantity * multiplier);
+
+                item.setCount(quantity);
                 item.setName(Utils.getItemStackName(this.selectedItem));
                 item.setMaterials(provideCraftFromItem(this.selectedItem.getItem()));
+//              item.sort(itemSort);
                 output.add(item);
+
             } catch (Exception ignored) {}
         }
 
-        for (CraftingPanelItemOutput item : this.selected) {
-
-            List<CraftingPanelItemOutput> listMaterials = provideCraftFromItem(Registry.ITEM.get(new Identifier("minecraft:" + item.getName().replaceAll(" ", "_").toLowerCase())));
-
-            if (listMaterials != null && !listMaterials.isEmpty()) {
-
-                float totalQuantityOfItem = item.getCount();
-
-                CraftingPanelItemOutput result = new CraftingPanelItemOutput();
-
-                int multiplier = Utils.cycle == 2 ? 3456 : 1;
-                if(Utils.cycle == 1) multiplier = 64;
-
-                result.setCount(totalQuantityOfItem * multiplier);
-                result.setName(item.getName());
-                result.setMaterials(new ArrayList<>());
-
-                for (CraftingPanelItemOutput material : listMaterials) {
-
-                    result.addMaterial(material);
-                }
-
-                output.add(result);
-            }
-        }
-
+        this.selected.forEach((item) -> {
+//          item.sort(itemSort);
+            CraftingPanelItemOutput newItem = item;
+            newItem.setMaterials(provideCraftFromItem(Utils.getItemStackFromItemCommandOutputName(item.getName()).getItem()));
+            output.add(item);
+        });
         return output;
     }
 
@@ -334,7 +300,6 @@ public class ItemsWidget extends WidgetBase {
             addingItem.setMaterials(provideCraftFromItem(this.selectedItem.getItem()));
             this.selected.add(addingItem);
         }
-
     }
 
 
@@ -349,23 +314,22 @@ public class ItemsWidget extends WidgetBase {
         }
     }
 
-    private boolean isAvaible(Item item) {
-        if (provideCraftFromItem(item) == null ||
-                item.equals(Items.GLASS) ||
-                item.equals(Items.SPONGE) ||
-                item.getDefaultStack().toString().contains("arrow") && !item.equals(Items.ARROW) ||
-                item.getDefaultStack().toString().contains("pattern") ||
-                item.equals(Items.FIREWORK_STAR) ||
-                item.equals(Items.DRAGON_BREATH)) {
-
-            return false;
-        }
-        return true;
+    private boolean isAvailable(Item item) {
+        return provideCraftFromItem(item) != null &&
+                !item.equals(Items.GLASS) &&
+                !item.equals(Items.SPONGE) &&
+                (!item.getDefaultStack().toString().contains("arrow") || item.equals(Items.ARROW)) &&
+                !item.getDefaultStack().toString().contains("pattern") &&
+                !item.equals(Items.FIREWORK_STAR) &&
+                !item.equals(Items.DRAGON_BREATH) &&
+                !item.getDefaultStack().toString().contains("rocket");
     }
 
     public void removeListSelected() {
-        if(this.selectedEntry != null) {
+        if (this.selectedEntry != null) {
             this.selected.remove(this.selectedEntry);
+            this.selectedEntry = null;
+            this.searchingList = null;
         }
     }
 
@@ -373,12 +337,12 @@ public class ItemsWidget extends WidgetBase {
     public void render(int mouseX, int mouseY, boolean selected, MatrixStack matrixStack) {
 
         RenderUtils.color(1f, 1f, 1f, 1f);
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(0, 0, 1);
+        matrixStack.translate(0, 0, 1);
 
         Screen screen = this.mc.currentScreen;
 
         RenderUtils.drawOutlinedBox(this.x, this.y, this.width, this.height, 0xA0000000, GuiBase.COLOR_HORIZONTAL_BAR);
+        assert screen != null;
         RenderUtils.drawOutlinedBox(this.width + 15, this.y, screen.width / 6, this.height + 50, 0xA0000000, GuiBase.COLOR_HORIZONTAL_BAR);
 
         if (this.selected != null && !this.selected.isEmpty()) {
@@ -388,10 +352,12 @@ public class ItemsWidget extends WidgetBase {
 
             for (CraftingPanelItemOutput item : this.selected) {
 
-                if (this.width + 17 + xLayers <= this.searchingList.getMouseX() && this.width + 17 + xLayers + 18 >= this.searchingList.getMouseX() &&
-                        this.y + 7 + yLayers <= this.searchingList.getMouseY() && this.y + 7 + yLayers + 18 >= this.searchingList.getMouseY()) {
+                if (this.searchingList != null) {
+                    if (this.width + 17 + xLayers <= this.searchingList.getMouseX() && this.width + 17 + xLayers + 18 >= this.searchingList.getMouseX() &&
+                            this.y + 7 + yLayers <= this.searchingList.getMouseY() && this.y + 7 + yLayers + 18 >= this.searchingList.getMouseY()) {
 
-                    this.selectedEntry = item;
+                        this.selectedEntry = item;
+                    }
                 }
 
                 ItemStack itemStack = Utils.getItemStackFromItemCommandOutputName(item.getName());
@@ -401,7 +367,7 @@ public class ItemsWidget extends WidgetBase {
                 this.textRenderer.drawWithShadow(matrixStack, "x" + amount, this.width + 35 + xLayers, this.y + 12 + yLayers, Color.WHITE.getRGB());
                 yLayers += 20;
 
-                if(this.selectedEntry != null && this.selectedEntry.equals(item)) {
+                if (this.selectedEntry != null && this.selectedEntry.equals(item)) {
                     RenderUtils.drawOutline(this.width + 15 + xLayers, this.y - 15 + yLayers, this.width - 297 + xLayers + this.textRenderer.getWidth("x" + amount), 20, GuiBase.COLOR_HORIZONTAL_BAR);
                 }
 
@@ -426,25 +392,23 @@ public class ItemsWidget extends WidgetBase {
 
         List<ItemStack> preList = new ArrayList<>();
         List<ItemStack> items = new ArrayList<>();
-        int amount = 0;
 
 
         switch (selectedTab) {
 
             case ALL:
                 for (Item item : Registry.ITEM) {
-                    if (!isAvaible(item)) {
+                    if (!isAvailable(item)) {
                         continue;
                     }
                     preList.add(item.getDefaultStack());
-                    amount++;
                 }
                 this.scrollBar.setMaxValue(22);
                 break;
 
             case BUILDING_BLOCKS:
                 for (Item item : Registry.ITEM) {
-                    if (!isAvaible(item)) {
+                    if (!isAvailable(item)) {
                         continue;
                     }
                     if (item.getGroup() == ItemGroup.BUILDING_BLOCKS) {
@@ -456,19 +420,19 @@ public class ItemsWidget extends WidgetBase {
 
             case DECORATION_BLOCKS:
                 for (Item item : Registry.ITEM) {
-                    if (!isAvaible(item)) {
+                    if (!isAvailable(item)) {
                         continue;
                     }
                     if (item.getGroup() == ItemGroup.DECORATIONS) {
                         preList.add(item.getDefaultStack());
                     }
                 }
-                this.scrollBar.setMaxValue(1);
+                this.scrollBar.setMaxValue(0);
                 break;
 
             case REDSTONE:
                 for (Item item : Registry.ITEM) {
-                    if (!isAvaible(item)) {
+                    if (!isAvailable(item)) {
                         continue;
                     }
                     if (item.getGroup() == ItemGroup.REDSTONE) {
@@ -480,7 +444,7 @@ public class ItemsWidget extends WidgetBase {
 
             case TRANSPORTATION:
                 for (Item item : Registry.ITEM) {
-                    if (!isAvaible(item)) {
+                    if (!isAvailable(item)) {
                         continue;
                     }
                     if (item.getGroup() == ItemGroup.TRANSPORTATION) {
@@ -492,7 +456,7 @@ public class ItemsWidget extends WidgetBase {
 
             case MISCELLANEOUS:
                 for (Item item : Registry.ITEM) {
-                    if (!isAvaible(item)) {
+                    if (!isAvailable(item)) {
                         continue;
                     }
                     if (item.getGroup() == ItemGroup.MISC) {
@@ -504,7 +468,7 @@ public class ItemsWidget extends WidgetBase {
 
             case FOOD:
                 for (Item item : Registry.ITEM) {
-                    if (!isAvaible(item)) {
+                    if (!isAvailable(item)) {
                         continue;
                     }
                     if (item.getGroup() == ItemGroup.FOOD) {
@@ -516,7 +480,7 @@ public class ItemsWidget extends WidgetBase {
 
             case TOOLS:
                 for (Item item : Registry.ITEM) {
-                    if (!isAvaible(item)) {
+                    if (!isAvailable(item)) {
                         continue;
                     }
                     if (item.getGroup() == ItemGroup.TOOLS) {
@@ -528,7 +492,7 @@ public class ItemsWidget extends WidgetBase {
 
             case COMBAT:
                 for (Item item : Registry.ITEM) {
-                    if (!isAvaible(item)) {
+                    if (!isAvailable(item)) {
                         continue;
                     }
                     if (item.getGroup() == ItemGroup.COMBAT) {
@@ -540,7 +504,7 @@ public class ItemsWidget extends WidgetBase {
 
             case BREWING:
                 for (Item item : Registry.ITEM) {
-                    if (isAvaible(item)) {
+                    if (isAvailable(item)) {
                         if (item.getGroup() == ItemGroup.BREWING) {
                             preList.add(item.getDefaultStack());
                         }
@@ -562,13 +526,9 @@ public class ItemsWidget extends WidgetBase {
             if (layer > 0 || helper > 0) {
                 if (helper == 0) {
                     helper = 17;
-                    if (layer != 0) {
-                        layer--;
-                    }
+                    layer--;
                 }
-                if (helper != 0) {
-                    helper--;
-                }
+                helper--;
                 continue;
             }
             xAmount += 18;
@@ -584,13 +544,11 @@ public class ItemsWidget extends WidgetBase {
                 }
             }
 
-            try {
-
+            if (this.selectedItem != null) {
                 if (item.getItem().equals(this.selectedItem.getItem()) && !item.toString().contains("potion") || item.equals(this.selectedItem)) {
 
                     RenderUtils.drawOutline(this.x - 18 + xAmount, this.y + 2 + yAmount - 2, 20, 20, Color.WHITE.getRGB());
                 }
-            } catch (NullPointerException ignored) {
             }
 
             if (xAmount - scrollbarWidth + 25 >= this.width) {
@@ -606,7 +564,6 @@ public class ItemsWidget extends WidgetBase {
 
         }
 
-        int scrollWidth = 10;
         this.searchBar.draw(mouseX, mouseY, matrixStack);
         this.amountSelected.draw(mouseX, mouseY, matrixStack);
         this.textRenderer.drawWithShadow(matrixStack, "Amount:", this.x + 1, this.height * 1.5f + 36, Color.WHITE.getRGB());
@@ -640,8 +597,6 @@ public class ItemsWidget extends WidgetBase {
 
             tabs += 32;
         }
-
-        RenderSystem.popMatrix();
     }
 
     protected static class TextFieldListener implements ITextFieldListener<GuiTextFieldGeneric> {
@@ -658,10 +613,6 @@ public class ItemsWidget extends WidgetBase {
             this.widget.updateFilteredEntries();
             return true;
         }
-    }
-
-    public List<CraftingPanelItemOutput> getSelected() {
-        return this.selected;
     }
 
     @Override
@@ -686,8 +637,8 @@ public class ItemsWidget extends WidgetBase {
 
     private static class MouseClick {
 
-        private int mouseX;
-        private int mouseY;
+        private final int mouseX;
+        private final int mouseY;
 
         public MouseClick(int mouseX, int mouseY) {
             this.mouseX = mouseX;
@@ -716,9 +667,9 @@ public class ItemsWidget extends WidgetBase {
         COMBAT(Items.GOLDEN_SWORD.getDefaultStack()),
         BREWING(Items.GLASS_BOTTLE.getDefaultStack());
 
-        private ItemStack stack;
+        private final ItemStack stack;
 
-        private Tabs(ItemStack stack) {
+        Tabs(ItemStack stack) {
             this.stack = stack;
         }
 

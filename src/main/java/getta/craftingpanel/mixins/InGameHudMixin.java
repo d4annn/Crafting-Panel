@@ -30,7 +30,7 @@ public class InGameHudMixin {
 
             for(CraftingPanelItemOutput item : CraftingPanel.items) {
 
-                int missing = Utils.getMissing(CraftingPanel.items, item, false);
+                int missing = Utils.getMissing(item, false);
 
                 if(missing == 0) {
 
@@ -43,7 +43,7 @@ public class InGameHudMixin {
 
                 MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices,"x" + missing,
                         this.scaledWidth - 2 - MinecraftClient.getInstance().textRenderer.getWidth("x" + missing) - xQuantity,
-                    this.scaledHeight - 23 - yQuantity, Color.WHITE.getRGB());
+                        this.scaledHeight - 23 - yQuantity, Color.WHITE.getRGB());
 
                 yQuantity += 20;
 
@@ -53,5 +53,5 @@ public class InGameHudMixin {
                 }
             }
         }
-     }
+    }
 }

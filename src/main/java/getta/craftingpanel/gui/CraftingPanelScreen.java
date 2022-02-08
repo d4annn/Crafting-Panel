@@ -19,8 +19,8 @@ public class CraftingPanelScreen extends GuiBase {
 
     protected ItemsWidget itemsWidget;
     protected ResultsCraftedWidget resultsCraftedWidget;
-    private Screen screen;
-    private int preButton;
+    private final Screen screen;
+    private final int preButton;
 
     public CraftingPanelScreen(int preButton) {
         super();
@@ -65,7 +65,7 @@ public class CraftingPanelScreen extends GuiBase {
         this.addWidget(this.resultsCraftedWidget);
 
         this.addButton(calculateMaterialsButton, (btn, mbtn) -> {
-            this.resultsCraftedWidget.recieveResults(this.itemsWidget.convertSelectionsToResults());
+            this.resultsCraftedWidget.receiveResults(this.itemsWidget.convertSelectionsToResults());
         });
 
         this.addButton(clearResults, (btn, mbtn) -> {

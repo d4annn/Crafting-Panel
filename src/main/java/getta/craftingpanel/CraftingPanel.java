@@ -22,8 +22,7 @@ public class CraftingPanel implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        keyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding("Crafting panel", InputUtil.Type.KEYSYM, GLFW.GLFW_NOT_INITIALIZED, "Crafting panel"));
-
+        keyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding("Crafting panel", InputUtil.Type.KEYSYM, -1, "Crafting panel"));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if(keyBinding.isPressed()) {
                 GuiBase.openGui(new CraftingPanelScreen(client.options.guiScale));
