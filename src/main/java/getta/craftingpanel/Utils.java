@@ -130,7 +130,6 @@ public class Utils {
                         CraftingPanelItemOutput item2 = new CraftingPanelItemOutput();
                         item2.setName(recipe.getName());
                         item2.setCount(newAmount);
-                        if("asd".equals("asd")){}
                         items1.add(item2);
                     }
                 }
