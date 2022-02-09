@@ -211,7 +211,7 @@ public class ItemsWidget extends WidgetBase {
     //Provided by akali, he's the best
     private static CraftingPanelItemOutput itemFromIngredient(Ingredient ingredient) {
 
-        ItemStack[] itemStackOfIngredient = ingredient.getMatchingStacksClient();
+        ItemStack[] itemStackOfIngredient = ingredient.getMatchingStacks();
 
         if (itemStackOfIngredient.length == 0) {
 
@@ -403,7 +403,7 @@ public class ItemsWidget extends WidgetBase {
                     }
                     preList.add(item.getDefaultStack());
                 }
-                this.scrollBar.setMaxValue(22);
+                this.scrollBar.setMaxValue(26);
                 break;
 
             case BUILDING_BLOCKS:
@@ -415,7 +415,7 @@ public class ItemsWidget extends WidgetBase {
                         preList.add(item.getDefaultStack());
                     }
                 }
-                this.scrollBar.setMaxValue(1);
+                this.scrollBar.setMaxValue(3);
                 break;
 
             case DECORATION_BLOCKS:

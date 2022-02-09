@@ -64,12 +64,12 @@ public class Utils {
         int found = 0;
         int required = (int) item.getCount();
 
-        for (int i = 0; i < Objects.requireNonNull(player).inventory.size(); i++) {
+        for (int i = 0; i < Objects.requireNonNull(player).getInventory().size(); i++) {
 
             if (found >= required && !max) {
                 return 0;
-            } else if (player.inventory.getStack(i).getItem() instanceof BlockItem && ((BlockItem) player.inventory.getStack(i).getItem()).getBlock() instanceof ShulkerBoxBlock) {
-                DefaultedList<ItemStack> items = InventoryUtils.getStoredItems(player.inventory.getStack(i), -1);
+            } else if (player.getInventory().getStack(i).getItem() instanceof BlockItem && ((BlockItem) player.getInventory().getStack(i).getItem()).getBlock() instanceof ShulkerBoxBlock) {
+                DefaultedList<ItemStack> items = InventoryUtils.getStoredItems(player.getInventory().getStack(i), -1);
 
                 for (ItemStack stack : items) {
 
@@ -79,8 +79,8 @@ public class Utils {
                         found += stack.getCount();
                     }
                 }
-            } else if (player.inventory.getStack(i).getItem().equals(getItemStackFromItemCommandOutputName(item.getName()).getItem())) {
-                found += player.inventory.getStack(i).getCount();
+            } else if (player.getInventory().getStack(i).getItem().equals(getItemStackFromItemCommandOutputName(item.getName()).getItem())) {
+                found += player.getInventory().getStack(i).getCount();
             }
         }
 
