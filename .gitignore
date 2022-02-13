@@ -32,3 +32,4 @@ bin/
 # fabric
 
 run/
+.gradle/7.0.2/fileHashes/fileHashes.lock
