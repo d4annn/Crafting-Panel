@@ -6,6 +6,7 @@ import fi.dy.masa.malilib.render.RenderUtils;
 import getta.craftingpanel.CraftingPanel;
 import getta.craftingpanel.Utils;
 import getta.craftingpanel.CraftingPanelItemOutput;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
@@ -57,7 +58,7 @@ public class ResultsCraftedWidget extends WidgetBase {
 
         String toggle = CraftingPanel.hud ? "ON" : "OFF";
         int color = CraftingPanel.hud ? Color.GREEN.getRGB() : Color.RED.getRGB();
-        this.textRenderer.draw(matrixStack, toggle, 55 + this.textRenderer.getWidth("Calculate Materials  Export") + 3, CraftingPanel.screen.height - 23, color);
+        this.textRenderer.draw(matrixStack, toggle, 55 + this.textRenderer.getWidth("Calculate Materials  Export") + 3, MinecraftClient.getInstance().getWindow().getScaledHeight() - 23, color);
 
         if (showResults && !this.results.isEmpty()) {
 

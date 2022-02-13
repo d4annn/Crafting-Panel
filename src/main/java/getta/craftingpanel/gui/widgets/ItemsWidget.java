@@ -340,7 +340,8 @@ public class ItemsWidget extends WidgetBase {
 
         RenderUtils.drawOutlinedBox(this.x, this.y, this.width, this.height, 0xA0000000, GuiBase.COLOR_HORIZONTAL_BAR);
         assert screen != null;
-        RenderUtils.drawOutlinedBox(this.width + 15, this.y, screen.width / 6, this.height + 50, 0xA0000000, GuiBase.COLOR_HORIZONTAL_BAR);
+        int scaledWidth = MinecraftClient.getInstance().getWindow().getScaledWidth();
+        RenderUtils.drawOutlinedBox(this.width + 15, this.y, (int) (scaledWidth - scaledWidth / 1.5) - scaledWidth / 6 - 1, this.height + 50, 0xA0000000, GuiBase.COLOR_HORIZONTAL_BAR);
 
         if (this.selected != null && !this.selected.isEmpty()) {
 

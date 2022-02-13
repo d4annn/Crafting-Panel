@@ -26,8 +26,6 @@ public class CraftingPanel implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if(keyBinding.isPressed()) {
                 GuiBase.openGui(new CraftingPanelScreen(client.options.guiScale));
-                MinecraftClient.getInstance().setScreen(null);
-                GuiBase.openGui(new CraftingPanelScreen(client.options.guiScale));
                 client.options.guiScale = 2;
                 client.onResolutionChanged();
             }
