@@ -61,6 +61,7 @@ public class CraftingPanelScreen extends GuiBase {
         ButtonGeneric hud = new ButtonGeneric(56 + this.textRenderer.getWidth("Calculate Materials  Export"), this.height - 30, -1, true, "HUD");
         ButtonGeneric export = new ButtonGeneric(69 + this.textRenderer.getWidth("Calculate Materials"), this.height - 30, -1, true, "Export");
         ButtonGeneric removeList = new ButtonGeneric((int) (width - width / 1.5) + 32 + width / 6, (int)(this.height / 2.5), -1, true, GuiBase.TXT_RED + "-");
+        ButtonGeneric clearSearch = new ButtonGeneric(50 + ((int) (width - width / 1.5) + 10) / 2, (int) (height / 4.2) - 22, -1, true, "Clear");
 
         this.addWidget(this.itemsWidget);
         this.addWidget(this.resultsCraftedWidget);
@@ -100,6 +101,10 @@ public class CraftingPanelScreen extends GuiBase {
 
         this.addButton(removeList, (btn, mbtn) -> {
             this.itemsWidget.removeListSelected();
+        });
+
+        this.addButton(clearSearch, (btn, mbtn) -> {
+            this.itemsWidget.clearSearch();
         });
     }
 

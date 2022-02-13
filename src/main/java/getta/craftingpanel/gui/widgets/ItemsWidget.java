@@ -11,10 +11,12 @@ import getta.craftingpanel.Utils;
 import getta.craftingpanel.CraftingPanelItemOutput;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.item.TooltipData;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.*;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.Recipe;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -180,7 +182,7 @@ public class ItemsWidget extends WidgetBase {
 
         Recipe<?> finalRecipe = recipe.get();
 
-         return getIngredients(finalRecipe.getIngredients());
+        return getIngredients(finalRecipe.getIngredients());
     }
 
     //Provided by akali, he's the best
@@ -245,7 +247,8 @@ public class ItemsWidget extends WidgetBase {
 //              item.sort(itemSort);
                 output.add(item);
 
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         this.selected.forEach((item) -> {
@@ -328,6 +331,11 @@ public class ItemsWidget extends WidgetBase {
             this.selectedEntry = null;
             this.searchingList = null;
         }
+    }
+
+    public void clearSearch() {
+        this.searchBar.getTextField().setText("");
+        this.updateFilteredEntries();
     }
 
     @Override
@@ -533,6 +541,13 @@ public class ItemsWidget extends WidgetBase {
 
             this.mc.getItemRenderer().renderInGui(item, this.x - 16 + xAmount, this.y + 2 + yAmount);
 
+            if (this.x - 16 + xAmount <= mouseX && this.x - 16 + xAmount + 18 >= mouseX &&
+                    this.y + 2 + yAmount <= mouseY && this.y + 2 + yAmount + 18 >= mouseY) {
+
+                List<Text> text = new ArrayList<>();
+                text.add(item.getName());
+                screen.renderTooltip(matrixStack, text, Optional.empty(), this.x - 24 + xAmount, this.y + 2 + yAmount);
+            }
             if (this.searchingItem != null && this.selectedItem == null) {
 
                 if (this.x - 16 + xAmount <= this.searchingItem.getMouseX() && this.x - 16 + xAmount + 18 >= this.searchingItem.getMouseX() &&
