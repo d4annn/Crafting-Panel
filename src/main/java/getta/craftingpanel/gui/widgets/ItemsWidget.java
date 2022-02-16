@@ -18,6 +18,7 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.Recipe;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -333,6 +334,11 @@ public class ItemsWidget extends WidgetBase {
         }
     }
 
+    public void clearSearch() {
+        this.searchBar.getTextField().setText("");
+        this.updateFilteredEntries();
+    }
+
     @Override
     public void render(int mouseX, int mouseY, boolean selected, MatrixStack matrixStack) {
 
@@ -343,7 +349,8 @@ public class ItemsWidget extends WidgetBase {
 
         RenderUtils.drawOutlinedBox(this.x, this.y, this.width, this.height, 0xA0000000, GuiBase.COLOR_HORIZONTAL_BAR);
         assert screen != null;
-        RenderUtils.drawOutlinedBox(this.width + 15, this.y, screen.width / 6, this.height + 50, 0xA0000000, GuiBase.COLOR_HORIZONTAL_BAR);
+        int scaledWidth = MinecraftClient.getInstance().getWindow().getScaledWidth();
+        RenderUtils.drawOutlinedBox(this.width + 15, this.y, (int) (scaledWidth - scaledWidth / 1.5) - scaledWidth / 6 - 1, this.height + 50, 0xA0000000, GuiBase.COLOR_HORIZONTAL_BAR);
 
         if (this.selected != null && !this.selected.isEmpty()) {
 
@@ -534,6 +541,14 @@ public class ItemsWidget extends WidgetBase {
             xAmount += 18;
 
             this.mc.getItemRenderer().renderInGui(item, this.x - 16 + xAmount, this.y + 2 + yAmount);
+
+            if (this.x - 16 + xAmount <= mouseX && this.x - 16 + xAmount + 18 >= mouseX &&
+                    this.y + 2 + yAmount <= mouseY && this.y + 2 + yAmount + 18 >= mouseY) {
+
+                List<Text> text = new ArrayList<>();
+                text.add(item.getName());
+                screen.renderTooltip(matrixStack, text, Optional.empty(), this.x - 24 + xAmount, this.y + 2 + yAmount);
+            }
 
             if (this.searchingItem != null && this.selectedItem == null) {
 

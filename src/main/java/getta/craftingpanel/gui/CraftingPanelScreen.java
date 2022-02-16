@@ -19,19 +19,21 @@ public class CraftingPanelScreen extends GuiBase {
 
     protected ItemsWidget itemsWidget;
     protected ResultsCraftedWidget resultsCraftedWidget;
-    private final Screen screen;
     private final int preButton;
+    private final int width;
+    private  final  int height;
 
     public CraftingPanelScreen(int preButton) {
         super();
         this.preButton = preButton;
         this.title = StringUtils.translate("Crafting Panel");
-        this.screen = CraftingPanel.screen;
+        this.width = MinecraftClient.getInstance().getWindow().getScaledWidth() * 2;
+        this.height = MinecraftClient.getInstance().getWindow().getScaledHeight() * 2;
 
         try {
 
-            this.itemsWidget = new ItemsWidget(10, (int) (screen.height / 4.2), (int) (screen.width - screen.width / 1.5), (int) (screen.height / 1.953));
-            this.resultsCraftedWidget = new ResultsCraftedWidget((int) (screen.width / 1.6), (int) (screen.height / 4.2), ((screen.width - 10) - (int) (screen.width / 1.6)), (int) (screen.height / 1.46));
+            this.itemsWidget = new ItemsWidget(10, (int) (height / 4.2), (int) (width - width / 1.5), (int) (height / 1.953));
+            this.resultsCraftedWidget = new ResultsCraftedWidget((int) (width / 1.6), (int) (height / 4.2), ((width - 10) - (int) (width / 1.6)), (int) (height / 1.46));
         } catch (NullPointerException ignored) {}
     }
 
@@ -51,15 +53,16 @@ public class CraftingPanelScreen extends GuiBase {
 
         //Widgets instance
         String name = StringUtils.translate("Calculate Materials");
-        ButtonGeneric calculateMaterialsButton = new ButtonGeneric(120, this.screen.height - 30, -1, true, name);
+        ButtonGeneric calculateMaterialsButton = new ButtonGeneric(120, this.height - 30, -1, true, name);
         ButtonGeneric clearResults = new ButtonGeneric(this.resultsCraftedWidget.getX() + this.textRenderer.getWidth("Clear Result###|"), this.height - 30, -1, true, "Clear Results");
         ButtonGeneric addToList = new ButtonGeneric((int)(this.itemsWidget.getX() + 22 * 4.8),  (int)(this.itemsWidget.getHeight() * 1.5f + 30), -1, true, GuiBase.TXT_GREEN + "+");
-        ButtonGeneric removeLastSelected = new ButtonGeneric((int)(this.screen.width / 2.9), (int)(this.itemsWidget.getHeight() * 1.5f - 6) + 58, -1, true, "Remove Last");
-        ButtonGeneric clearSelected = new ButtonGeneric((int)(this.screen.width / 2.9), (int)(this.itemsWidget.getHeight() * 1.5f + 31), -1, true, "Clear Selected");
+        ButtonGeneric removeLastSelected = new ButtonGeneric((int)(this.width / 2.9), (int)(this.itemsWidget.getHeight() * 1.5f - 6) + 58, -1, true, "Remove Last");
+        ButtonGeneric clearSelected = new ButtonGeneric((int)(this.width / 2.9), (int)(this.itemsWidget.getHeight() * 1.5f + 31), -1, true, "Clear Selected");
         ButtonGeneric changeTypeButton = new ButtonGeneric(this.resultsCraftedWidget.getX() + this.textRenderer.getWidth("Clear Result#############|@#~€###|") + 4, this.height - 30, -1, true, "Change Output Type");
-        ButtonGeneric hud = new ButtonGeneric(56 + this.textRenderer.getWidth("Calculate Materials  Export"), this.screen.height - 30, -1, true, "HUD");
-        ButtonGeneric export = new ButtonGeneric(69 + this.textRenderer.getWidth("Calculate Materials"), this.screen.height - 30, -1, true, "Export");
-        ButtonGeneric removeList = new ButtonGeneric((int) (screen.width - screen.width / 1.5) + 32 + screen.width / 6, (int)(this.screen.height / 2.5), -1, true, GuiBase.TXT_RED + "-");
+        ButtonGeneric hud = new ButtonGeneric(56 + this.textRenderer.getWidth("Calculate Materials  Export"), this.height - 30, -1, true, "HUD");
+        ButtonGeneric export = new ButtonGeneric(69 + this.textRenderer.getWidth("Calculate Materials"), this.height - 30, -1, true, "Export");
+        ButtonGeneric removeList = new ButtonGeneric((int) (width - width / 1.5) + 32 + width / 6, (int)(this.height / 2.5), -1, true, GuiBase.TXT_RED + "-");
+        ButtonGeneric clearSearch = new ButtonGeneric(50 + ((int) (width - width / 1.5) + 10) / 2, (int) (height / 4.2) - 22, -1, true, "Clear");
 
         this.addWidget(this.itemsWidget);
         this.addWidget(this.resultsCraftedWidget);
@@ -99,6 +102,10 @@ public class CraftingPanelScreen extends GuiBase {
 
         this.addButton(removeList, (btn, mbtn) -> {
             this.itemsWidget.removeListSelected();
+        });
+
+        this.addButton(clearSearch, (btn, mbtn) -> {
+            this.itemsWidget.clearSearch();
         });
     }
 

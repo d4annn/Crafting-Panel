@@ -5,7 +5,6 @@
   "compatibilityLevel": "JAVA_16",
   "client": [
     "InGameHudMixin",
-    "ScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

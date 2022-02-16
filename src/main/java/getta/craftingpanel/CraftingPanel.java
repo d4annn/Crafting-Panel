@@ -16,7 +16,6 @@ import java.util.List;
 public class CraftingPanel implements ClientModInitializer {
 
     private static KeyBinding keyBinding;
-    public static Screen screen = null;
     public static List<CraftingPanelItemOutput> items = null;
     public static boolean hud = false;
 
