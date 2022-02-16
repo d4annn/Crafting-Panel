@@ -9,6 +9,7 @@ import fi.dy.masa.malilib.gui.wrappers.TextFieldWrapper;
 import fi.dy.masa.malilib.render.RenderUtils;
 import getta.craftingpanel.Utils;
 import getta.craftingpanel.CraftingPanelItemOutput;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.item.TooltipData;
