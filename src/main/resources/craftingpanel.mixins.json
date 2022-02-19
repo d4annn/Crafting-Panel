@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_16",
   "client": [
     "InGameHudMixin",
+    "LitematicaMixin"
   ],
   "injectors": {
     "defaultRequire": 1

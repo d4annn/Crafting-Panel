@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import fi.dy.masa.malilib.gui.GuiBase;
 import fi.dy.masa.malilib.gui.widgets.WidgetBase;
 import fi.dy.masa.malilib.render.RenderUtils;
+import fi.dy.masa.malilib.util.GuiUtils;
 import getta.craftingpanel.CraftingPanel;
 import getta.craftingpanel.Utils;
 import getta.craftingpanel.CraftingPanelItemOutput;
@@ -18,6 +19,7 @@ import java.awt.*;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ResultsCraftedWidget extends WidgetBase {
 
@@ -29,7 +31,7 @@ public class ResultsCraftedWidget extends WidgetBase {
     private boolean showResults;
     private List<CraftingPanelItemOutput> currentShow = null;
 
-    public ResultsCraftedWidget(int x, int y, int width, int height) {
+    public ResultsCraftedWidget(int x, int y, int width, int height, List<CraftingPanelItemOutput> items) {
         super(x, y, width, height);
 
         this.x = x;
@@ -39,6 +41,11 @@ public class ResultsCraftedWidget extends WidgetBase {
 
         this.results = new ArrayList<>();
         this.showResults = false;
+
+        if (items != null && !items.isEmpty()) {
+            this.results = items;
+            this.showResults = true;
+        }
     }
 
     public void cycle() {
@@ -61,25 +68,31 @@ public class ResultsCraftedWidget extends WidgetBase {
 
         String toggle = CraftingPanel.hud ? "ON" : "OFF";
         int color = CraftingPanel.hud ? Color.GREEN.getRGB() : Color.RED.getRGB();
-        this.textRenderer.draw(matrixStack, toggle, 55 + this.textRenderer.getWidth("Calculate Materials  Export") + 3, MinecraftClient.getInstance().getWindow().getScaledHeight() - 23, color);
+        this.textRenderer.draw(matrixStack, toggle, 50 + this.textRenderer.getWidth("Calculate Materials  Export") + 3, MinecraftClient.getInstance().getWindow().getScaledHeight() - 23, color);
 
         if (showResults && !this.results.isEmpty()) {
 
             int xQuantity = 0;
             int yQuantity = 0;
 
-            List<CraftingPanelItemOutput> items = Utils.convertItemToMaterials(results);
-
+            List<CraftingPanelItemOutput> items;
+            if (results.get(0).getMaterials() != null) {
+                items = Utils.convertItemToMaterials(results);
+            } else {
+                items = results;
+            }
             float biggest = 0;
 
             this.currentShow = items;
 
             for (CraftingPanelItemOutput item : items) {
 
+                float realCount = item.getCount();
+
                 if (Utils.cycle == 2) {
-                    item.setCount(item.getCount() / 3456);
+                    item.setCount(item.getCount() / Utils.shulker);
                 } else if (Utils.cycle == 1) {
-                    item.setCount(item.getCount() / 64);
+                    item.setCount(item.getCount() / Utils.stack);
                 }
 
                 if (item.getCount() > biggest) {
@@ -88,20 +101,51 @@ public class ResultsCraftedWidget extends WidgetBase {
                 }
 
                 ItemStack itemStack = Utils.getItemStackFromItemCommandOutputName(item.getName());
+
                 try {
                     String amount = String.valueOf((int) item.getCount());
 
                     this.mc.getItemRenderer().renderInGui(itemStack, this.x + 7 + xQuantity, this.y + 15 + yQuantity);
                     this.textRenderer.drawWithShadow(matrixStack, "x" + amount, this.x + 30 + xQuantity, this.y + 20 + yQuantity, Color.WHITE.getRGB());
 
+                    if (this.x + 7 + xQuantity <= mouseX && this.x + 24 + xQuantity >= mouseX &&
+                            this.y + 15 + yQuantity <= mouseY && this.y + 30 + yQuantity >= mouseY) {
+
+                        List<Text> text = new ArrayList<>();
+                        int stacks = 0;
+                        int shulkers = 0;
+                        text.add(Text.of("Total Items: §l" + (int) realCount));
+                        while (realCount >= Utils.shulker) {
+                            shulkers++;
+                            realCount -= Utils.shulker;
+                        }
+                        while (realCount >= Utils.stack) {
+                            stacks++;
+                            realCount -= Utils.stack;
+                        }
+                        String quantity = "Shulkers: §l" + shulkers + " §rStacks: §l" + stacks + " §rItems: §l" + (int) realCount;
+                        text.add(0, Text.of("§nItems:"));
+                        text.add(0, Text.of(quantity));
+                        text.add(0, Text.of("§nSimple:"));
+                        text.add(0, Text.of("§l" + Utils.getItemStackFromItemCommandOutputName(item.getName()).getName().getString()));
+                        GuiUtils.getCurrentScreen().renderTooltip(matrixStack, text, Optional.empty(), this.x - 24 + xQuantity, this.y - 25 + yQuantity);
+                    }
+
                     yQuantity += 20;
 
                     if (yQuantity + 20 >= this.height) {
 
+                        if (xQuantity + this.textRenderer.getWidth("x " + (int) biggest) + 40 >= this.width) {
+                            break;
+                        }
+
                         yQuantity = 0;
                         xQuantity += 22 + this.textRenderer.getWidth("x " + (int) biggest);
                     }
+
+
                 } catch (Exception ignored) {
+                    ignored.printStackTrace();
                 }
             }
         }

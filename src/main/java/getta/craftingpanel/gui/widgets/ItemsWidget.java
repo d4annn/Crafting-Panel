@@ -169,64 +169,6 @@ public class ItemsWidget extends WidgetBase {
         return false;
     }
 
-    //Provided by akali, he's the best
-    private List<CraftingPanelItemOutput> provideCraftFromItem(Item item) {
-
-        //ITEM, BLOCK, POTION, ENCHANTMENT, ENTITIES: Minecart, Boat.
-
-        assert MinecraftClient.getInstance().player != null;
-        Optional<? extends Recipe<?>> recipe = MinecraftClient.getInstance().player.world.getRecipeManager().get(new Identifier(item.toString()));
-        if (!recipe.isPresent()) {
-
-            return null;
-        }
-
-
-        Recipe<?> finalRecipe = recipe.get();
-
-        return getIngredients(finalRecipe.getIngredients());
-    }
-
-    //Provided by akali, he's the best
-    private List<CraftingPanelItemOutput> getIngredients(List<Ingredient> ingredients) {
-        Map<String, CraftingPanelItemOutput> history = new HashMap<>();
-
-        for (Ingredient ingredient : ingredients) {
-
-            CraftingPanelItemOutput item = itemFromIngredient(ingredient);
-            if (item != null) {
-
-                if (history.containsKey(item.getName())) {
-
-                    history.get(item.getName()).incrementCount();
-                } else {
-
-                    history.put(item.getName(), item);
-                }
-            }
-        }
-
-        return new ArrayList<>(history.values());
-    }
-
-    //Provided by akali, he's the best
-    private static CraftingPanelItemOutput itemFromIngredient(Ingredient ingredient) {
-
-        ItemStack[] itemStackOfIngredient = ingredient.getMatchingStacks();
-
-        if (itemStackOfIngredient.length == 0) {
-
-            return null;
-        }
-
-        ItemStack itemStack = itemStackOfIngredient[0];
-        CraftingPanelItemOutput result = new CraftingPanelItemOutput();
-        result.setName(Utils.getItemStackName(itemStack));
-        result.incrementCount();
-
-        return result;
-    }
-
     public List<CraftingPanelItemOutput> convertSelectionsToResults() {
 
         List<CraftingPanelItemOutput> output = new ArrayList<>();
@@ -245,7 +187,7 @@ public class ItemsWidget extends WidgetBase {
 
                 item.setCount(quantity);
                 item.setName(Utils.getItemStackName(this.selectedItem));
-                item.setMaterials(provideCraftFromItem(this.selectedItem.getItem()));
+                item.setMaterials(Utils.provideCraftFromItem(this.selectedItem.getItem()));
 //              item.sort(itemSort);
                 output.add(item);
 
@@ -253,9 +195,7 @@ public class ItemsWidget extends WidgetBase {
         }
 
         this.selected.forEach((item) -> {
-//          item.sort(itemSort);
-            CraftingPanelItemOutput newItem = item;
-            newItem.setMaterials(provideCraftFromItem(Utils.getItemStackFromItemCommandOutputName(item.getName()).getItem()));
+            item.setMaterials(Utils.provideCraftFromItem(Utils.getItemStackFromItemCommandOutputName(item.getName()).getItem()));
             output.add(item);
         });
         return output;
@@ -298,7 +238,7 @@ public class ItemsWidget extends WidgetBase {
             }
 
             addingItem.setCount(quantity);
-            addingItem.setMaterials(provideCraftFromItem(this.selectedItem.getItem()));
+            addingItem.setMaterials(Utils.provideCraftFromItem(this.selectedItem.getItem()));
             this.selected.add(addingItem);
         }
     }
@@ -316,7 +256,7 @@ public class ItemsWidget extends WidgetBase {
     }
 
     private boolean isAvailable(Item item) {
-        return provideCraftFromItem(item) != null &&
+        return Utils.provideCraftFromItem(item) != null &&
                 !item.equals(Items.GLASS) &&
                 !item.equals(Items.SPONGE) &&
                 (!item.getDefaultStack().toString().contains("arrow") || item.equals(Items.ARROW)) &&
@@ -542,7 +482,7 @@ public class ItemsWidget extends WidgetBase {
 
             this.mc.getItemRenderer().renderInGui(item, this.x - 16 + xAmount, this.y + 2 + yAmount);
 
-            if (this.x - 16 + xAmount <= mouseX && this.x - 16 + xAmount + 18 >= mouseX &&
+            if (this.x - 16 + xAmount <= mouseX && this.x - 16 + xAmount + 14 >= mouseX &&
                     this.y + 2 + yAmount <= mouseY && this.y + 2 + yAmount + 18 >= mouseY) {
 
                 List<Text> text = new ArrayList<>();
