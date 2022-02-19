@@ -6,22 +6,23 @@ import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public class Utils {
 
     public static String[] outputTypes = {"Items", "Stacks", "Shulkers"};
     public static int cycle = 0;
+    public static final int shulker = 3456;
+    public static final int stack = 64;
 
     public static ItemStack getItemStackFromItemCommandOutputName(String name) {
         String identifier = "minecraft:" + getItemStackName(Registry.ITEM.get(new Identifier("minecraft:" + name.replaceAll(" ", "_").toLowerCase())).getDefaultStack()).toLowerCase();
@@ -99,6 +100,7 @@ public class Utils {
         for (CraftingPanelItemOutput item : itemList) {
             assert MinecraftClient.getInstance().player != null;
             Optional<? extends Recipe<?>> recipe1 = MinecraftClient.getInstance().player.world.getRecipeManager().get(new Identifier(Utils.getItemStackFromItemCommandOutputName(item.getName()).getItem().toString()));
+            if(!recipe1.isPresent()) return null;
             int outQuantity = recipe1.get().getOutput().getCount();
             int quantity = 0;
             boolean found = false;
@@ -155,5 +157,59 @@ public class Utils {
             }
         }
         return items1;
+    }
+
+    public static List<CraftingPanelItemOutput> provideCraftFromItem(Item item) {
+
+        //ITEM, BLOCK, POTION, ENCHANTMENT, ENTITIES: Minecart, Boat.
+
+        assert MinecraftClient.getInstance().player != null;
+        Optional<? extends Recipe<?>> recipe = MinecraftClient.getInstance().player.world.getRecipeManager().get(new Identifier(item.toString()));
+        if (!recipe.isPresent()) {
+
+            return null;
+        }
+
+        Recipe<?> finalRecipe = recipe.get();
+
+        return getIngredients(finalRecipe.getIngredients());
+    }
+
+    public static List<CraftingPanelItemOutput> getIngredients(List<Ingredient> ingredients) {
+        Map<String, CraftingPanelItemOutput> history = new HashMap<>();
+
+        for (Ingredient ingredient : ingredients) {
+
+            CraftingPanelItemOutput item = itemFromIngredient(ingredient);
+            if (item != null) {
+
+                if (history.containsKey(item.getName())) {
+
+                    history.get(item.getName()).incrementCount();
+                } else {
+
+                    history.put(item.getName(), item);
+                }
+            }
+        }
+
+        return new ArrayList<>(history.values());
+    }
+
+    public static CraftingPanelItemOutput itemFromIngredient(Ingredient ingredient) {
+
+        ItemStack[] itemStackOfIngredient = ingredient.getMatchingStacks();
+
+        if (itemStackOfIngredient.length == 0) {
+
+            return null;
+        }
+
+        ItemStack itemStack = itemStackOfIngredient[0];
+        CraftingPanelItemOutput result = new CraftingPanelItemOutput();
+        result.setName(Utils.getItemStackName(itemStack));
+        result.incrementCount();
+
+        return result;
     }
 }
