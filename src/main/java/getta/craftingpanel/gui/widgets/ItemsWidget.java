@@ -137,6 +137,9 @@ public class ItemsWidget extends WidgetBase {
 
     @Override
     protected boolean onKeyTypedImpl(int keyCode, int scanCode, int modifiers) {
+        if(keyCode == 335 || keyCode == 257) {
+            this.addToList();
+        }
 
         if (this.searchBar.getTextField().isFocused()) {
 
@@ -156,14 +159,11 @@ public class ItemsWidget extends WidgetBase {
     }
 
     @Override
-    public boolean onMouseScrolledImpl(int mouseX, int mouseY, double mouseWheelDelta) {
-
+    public boolean onMouseScrolled(int mouseX, int mouseY, double mouseWheelDelta) {
+        int amount = mouseWheelDelta < 0 ? 1 : -1;
         if (this.isMouseOver(mouseX, mouseY)) {
-
-            int amount = mouseWheelDelta < 0 ? 1 : -1;
             this.scrollBar.offsetValue(amount);
         }
-
         return false;
     }
 
@@ -297,7 +297,13 @@ public class ItemsWidget extends WidgetBase {
             int xLayers = 0;
             int yLayers = 0;
 
+            float biggest = 0;
+
             for (CraftingPanelItemOutput item : this.selected) {
+
+                if(item.getCount() > biggest) {
+                    biggest = item.getCount();
+                }
 
                 if (this.searchingList != null) {
                     if (this.width + 17 + xLayers <= this.searchingList.getMouseX() && this.width + 17 + xLayers + 18 >= this.searchingList.getMouseX() &&
@@ -315,18 +321,18 @@ public class ItemsWidget extends WidgetBase {
                 yLayers += 20;
 
                 if (this.selectedEntry != null && this.selectedEntry.equals(item)) {
-                    RenderUtils.drawOutline(this.width + 15 + xLayers, this.y - 15 + yLayers, this.width - 297 + xLayers + this.textRenderer.getWidth("x" + amount), 20, GuiBase.COLOR_HORIZONTAL_BAR);
+                    RenderUtils.drawOutline(this.width + 15 + xLayers, this.y - 15 + yLayers, 22 + textRenderer.getWidth("x" + amount), 20, GuiBase.COLOR_HORIZONTAL_BAR);;
                 }
 
                 if (yLayers + 20 >= this.height + 50) {
 
-                    if (xLayers - 50 >= this.width / 6) {
+                    if (xLayers + this.textRenderer.getWidth("x " + (int) biggest) + 55 >= (int) (scaledWidth - scaledWidth / 1.5) - scaledWidth / 6 - 1) {
 
                         break;
                     }
 
                     yLayers = 0;
-                    xLayers += 40;
+                    xLayers += 22 + this.textRenderer.getWidth("x " + (int) biggest);
                 }
             }
         }

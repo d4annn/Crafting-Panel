@@ -27,6 +27,9 @@ public class ResultsCraftedWidget extends WidgetBase {
     private final int height;
     private boolean showResults;
     private List<CraftingPanelItemOutput> currentShow = null;
+    private final ScrollBar scrollBar;
+    private int maxValue = 0;
+    private List<String> finalItems = new ArrayList<>();
 
     public ResultsCraftedWidget(int x, int y, int width, int height, List<CraftingPanelItemOutput> items) {
         super(x, y, width, height);
@@ -38,6 +41,8 @@ public class ResultsCraftedWidget extends WidgetBase {
 
         this.results = new ArrayList<>();
         this.showResults = false;
+        this.scrollBar = new ScrollBar();
+        this.scrollBar.setMaxValue(0);
 
         if (items != null && !items.isEmpty()) {
             this.results = items;
@@ -45,7 +50,22 @@ public class ResultsCraftedWidget extends WidgetBase {
         }
     }
 
+    @Override
+    public boolean onMouseScrolled(int mouseX, int mouseY, double mouseWheelDelta) {
+
+        if (this.isMouseOver(mouseX, mouseY)) {
+
+            int amount = mouseWheelDelta < 0 ? 1 : -1;
+            this.scrollBar.onScroll(amount);
+        }
+
+        return false;
+    }
+
     public void cycle() {
+        this.scrollBar.setMaxValue(0);
+        this.scrollBar.onScroll(-this.scrollBar.getValue());
+        this.finalItems.clear();
         if (Utils.cycle == Utils.outputTypes.length - 1) {
             Utils.cycle = 0;
         } else {
@@ -56,6 +76,7 @@ public class ResultsCraftedWidget extends WidgetBase {
     @Override
     public void render(int mouseX, int mouseY, boolean selected, MatrixStack matrixStack) {
 
+        //de altura siempre hay 17
         RenderUtils.color(1f, 1f, 1f, 1f);
         matrixStack.translate(0, 0, 1);
 
@@ -81,8 +102,19 @@ public class ResultsCraftedWidget extends WidgetBase {
             float biggest = 0;
 
             this.currentShow = items;
+            int layers = this.scrollBar.getValue();
+            int amountPerLayer = 0;
 
             for (CraftingPanelItemOutput item : items) {
+
+                if (layers > 0 || amountPerLayer > 0) {
+                    if (amountPerLayer == 0) {
+                        amountPerLayer = 17;
+                        layers--;
+                    }
+                    amountPerLayer--;
+                    continue;
+                }
 
                 float realCount = item.getCount();
 
@@ -132,12 +164,20 @@ public class ResultsCraftedWidget extends WidgetBase {
 
                     if (yQuantity + 20 >= this.height) {
 
-                        if (xQuantity + this.textRenderer.getWidth("x " + (int) biggest) >= this.width) {
+                        if (xQuantity + this.textRenderer.getWidth("x " + (int) biggest) + 70 >= this.width) {
+                            if(!items.get(items.size() - 1).equals(item)) {
+
+                                if(!this.finalItems.contains(item.getName())) {
+                                    this.finalItems.add(item.getName());
+                                    this.scrollBar.setMaxValue(this.scrollBar.getMaxValue() + 1);
+                                }
+                            }
                             break;
                         }
 
                         yQuantity = 0;
                         xQuantity += 22 + this.textRenderer.getWidth("x " + (int) biggest);
+                        biggest = 0;
                     }
 
 
@@ -152,15 +192,21 @@ public class ResultsCraftedWidget extends WidgetBase {
 
         this.results = new ArrayList<>();
         this.showResults = false;
+        this.scrollBar.setMaxValue(0);
+        this.scrollBar.onScroll(-this.scrollBar.getValue());
+        this.finalItems.clear();
     }
 
     public void receiveResults(@NotNull List<CraftingPanelItemOutput> results) {
-
         this.results = results;
         this.showResults = true;
+        this.scrollBar.setMaxValue(0);
+        this.finalItems.clear();
+        this.scrollBar.onScroll(-this.scrollBar.getValue());
     }
 
     public void setHud() {
+        this.scrollBar.setMaxValue(this.scrollBar.getMaxValue() - 1);
         CraftingPanel.hud = !CraftingPanel.hud;
         if (CraftingPanel.hud && this.currentShow != null) {
             CraftingPanel.items = this.currentShow;
