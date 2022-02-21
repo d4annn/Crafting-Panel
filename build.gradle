@@ -11,9 +11,11 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
-	maven { url 'https://maven.terraformersmc.com/releases/' }
 	maven {
-		url 'https://masa.dy.fi/maven'
+		url = "https://www.cursemaven.com"
+	}
+	maven {
+		url 'https://maven.terraformersmc.com/releases/'
 	}
 }
 
@@ -25,7 +27,8 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modImplementation "fi.dy.masa.malilib:malilib-fabric-${project.minecraft_version}:${project.malilib_version}"
+	modImplementation("curse.maven:litematica-308892:${project.litematica_version}")
+	modImplementation("curse.maven:malilib-303119:${project.malilib_version}")
 	modCompileOnly "com.terraformersmc:modmenu:${project.mod_menu_version}"
 
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
@@ -52,7 +55,7 @@ tasks.withType(JavaCompile).configureEach {
 	// We'll use that if it's available, but otherwise we'll use the older option.
 	def targetVersion = 8
 	if (JavaVersion.current().isJava9Compatible()) {
-		 it.options.release = targetVersion
+		it.options.release = targetVersion
 	}
 }
 

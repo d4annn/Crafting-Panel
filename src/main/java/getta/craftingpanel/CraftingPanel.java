@@ -16,7 +16,6 @@ import java.util.List;
 public class CraftingPanel implements ClientModInitializer {
 
     private static KeyBinding keyBinding;
-    public static Screen screen = null;
     public static List<CraftingPanelItemOutput> items = null;
     public static boolean hud = false;
 
@@ -25,10 +24,17 @@ public class CraftingPanel implements ClientModInitializer {
         keyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding("Crafting panel", InputUtil.Type.KEYSYM, -1, "Crafting panel"));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if(keyBinding.isPressed()) {
-                GuiBase.openGui(new CraftingPanelScreen(client.options.guiScale));
+                GuiBase.openGui(new CraftingPanelScreen(client.options.guiScale, null));
                 client.options.guiScale = 2;
                 client.onResolutionChanged();
             }
         });
+    }
+
+    public static void createScreenWithMaterials(List<CraftingPanelItemOutput> items) {
+        int preButton = MinecraftClient.getInstance().options.guiScale;
+        GuiBase.openGui(new CraftingPanelScreen(preButton, items));
+        MinecraftClient.getInstance().options.guiScale = 2;
+        MinecraftClient.getInstance().onResolutionChanged();
     }
 }

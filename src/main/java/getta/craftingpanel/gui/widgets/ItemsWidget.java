@@ -18,6 +18,7 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.Recipe;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -138,7 +139,9 @@ public class ItemsWidget extends WidgetBase {
 
     @Override
     protected boolean onKeyTypedImpl(int keyCode, int scanCode, int modifiers) {
-
+        if(keyCode == 335 || keyCode == 257) {
+            this.addToList();
+        }
         if (this.searchBar.getTextField().isFocused()) {
 
 
@@ -157,73 +160,12 @@ public class ItemsWidget extends WidgetBase {
     }
 
     @Override
-    public boolean onMouseScrolledImpl(int mouseX, int mouseY, double mouseWheelDelta) {
-
-        if (this.isMouseOver(mouseX, mouseY)) {
-
-            int amount = mouseWheelDelta < 0 ? 1 : -1;
+    public boolean onMouseScrolled(int mouseX, int mouseY, double mouseWheelDelta) {
+        int amount = mouseWheelDelta < 0 ? 1 : -1;
+        if(this.isMouseOver(mouseX, mouseY)) {
             this.scrollBar.offsetValue(amount);
         }
-
         return false;
-    }
-
-    //Provided by akali, he's the best
-    private List<CraftingPanelItemOutput> provideCraftFromItem(Item item) {
-
-        //ITEM, BLOCK, POTION, ENCHANTMENT, ENTITIES: Minecart, Boat.
-
-        assert MinecraftClient.getInstance().player != null;
-        Optional<? extends Recipe<?>> recipe = MinecraftClient.getInstance().player.world.getRecipeManager().get(new Identifier(item.toString()));
-        if (!recipe.isPresent()) {
-
-            return null;
-        }
-
-
-        Recipe<?> finalRecipe = recipe.get();
-
-        return getIngredients(finalRecipe.getIngredients());
-    }
-
-    //Provided by akali, he's the best
-    private List<CraftingPanelItemOutput> getIngredients(List<Ingredient> ingredients) {
-        Map<String, CraftingPanelItemOutput> history = new HashMap<>();
-
-        for (Ingredient ingredient : ingredients) {
-
-            CraftingPanelItemOutput item = itemFromIngredient(ingredient);
-            if (item != null) {
-
-                if (history.containsKey(item.getName())) {
-
-                    history.get(item.getName()).incrementCount();
-                } else {
-
-                    history.put(item.getName(), item);
-                }
-            }
-        }
-
-        return new ArrayList<>(history.values());
-    }
-
-    //Provided by akali, he's the best
-    private static CraftingPanelItemOutput itemFromIngredient(Ingredient ingredient) {
-
-        ItemStack[] itemStackOfIngredient = ingredient.getMatchingStacksClient();
-
-        if (itemStackOfIngredient.length == 0) {
-
-            return null;
-        }
-
-        ItemStack itemStack = itemStackOfIngredient[0];
-        CraftingPanelItemOutput result = new CraftingPanelItemOutput();
-        result.setName(Utils.getItemStackName(itemStack));
-        result.incrementCount();
-
-        return result;
     }
 
     public List<CraftingPanelItemOutput> convertSelectionsToResults() {
@@ -244,7 +186,7 @@ public class ItemsWidget extends WidgetBase {
 
                 item.setCount(quantity);
                 item.setName(Utils.getItemStackName(this.selectedItem));
-                item.setMaterials(provideCraftFromItem(this.selectedItem.getItem()));
+                item.setMaterials(Utils.provideCraftFromItem(this.selectedItem.getItem()));
 //              item.sort(itemSort);
                 output.add(item);
 
@@ -252,9 +194,7 @@ public class ItemsWidget extends WidgetBase {
         }
 
         this.selected.forEach((item) -> {
-//          item.sort(itemSort);
-            CraftingPanelItemOutput newItem = item;
-            newItem.setMaterials(provideCraftFromItem(Utils.getItemStackFromItemCommandOutputName(item.getName()).getItem()));
+            item.setMaterials(Utils.provideCraftFromItem(Utils.getItemStackFromItemCommandOutputName(item.getName()).getItem()));
             output.add(item);
         });
         return output;
@@ -297,7 +237,7 @@ public class ItemsWidget extends WidgetBase {
             }
 
             addingItem.setCount(quantity);
-            addingItem.setMaterials(provideCraftFromItem(this.selectedItem.getItem()));
+            addingItem.setMaterials(Utils.provideCraftFromItem(this.selectedItem.getItem()));
             this.selected.add(addingItem);
         }
     }
@@ -315,7 +255,7 @@ public class ItemsWidget extends WidgetBase {
     }
 
     private boolean isAvailable(Item item) {
-        return provideCraftFromItem(item) != null &&
+        return Utils.provideCraftFromItem(item) != null &&
                 !item.equals(Items.GLASS) &&
                 !item.equals(Items.SPONGE) &&
                 (!item.getDefaultStack().toString().contains("arrow") || item.equals(Items.ARROW)) &&
@@ -333,6 +273,11 @@ public class ItemsWidget extends WidgetBase {
         }
     }
 
+    public void clearSearch() {
+        this.searchBar.getTextField().setText("");
+        this.updateFilteredEntries();
+    }
+
     @Override
     public void render(int mouseX, int mouseY, boolean selected, MatrixStack matrixStack) {
 
@@ -343,14 +288,21 @@ public class ItemsWidget extends WidgetBase {
 
         RenderUtils.drawOutlinedBox(this.x, this.y, this.width, this.height, 0xA0000000, GuiBase.COLOR_HORIZONTAL_BAR);
         assert screen != null;
-        RenderUtils.drawOutlinedBox(this.width + 15, this.y, screen.width / 6, this.height + 50, 0xA0000000, GuiBase.COLOR_HORIZONTAL_BAR);
+        int scaledWidth = MinecraftClient.getInstance().getWindow().getScaledWidth();
+        RenderUtils.drawOutlinedBox(this.width + 15, this.y, (int) (scaledWidth - scaledWidth / 1.5) - scaledWidth / 6 - 1, this.height + 50, 0xA0000000, GuiBase.COLOR_HORIZONTAL_BAR);
 
         if (this.selected != null && !this.selected.isEmpty()) {
 
             int xLayers = 0;
             int yLayers = 0;
 
+            float biggest = 0;
+
             for (CraftingPanelItemOutput item : this.selected) {
+
+                if(item.getCount() > biggest) {
+                    biggest = item.getCount();
+                }
 
                 if (this.searchingList != null) {
                     if (this.width + 17 + xLayers <= this.searchingList.getMouseX() && this.width + 17 + xLayers + 18 >= this.searchingList.getMouseX() &&
@@ -368,18 +320,17 @@ public class ItemsWidget extends WidgetBase {
                 yLayers += 20;
 
                 if (this.selectedEntry != null && this.selectedEntry.equals(item)) {
-                    RenderUtils.drawOutline(this.width + 15 + xLayers, this.y - 15 + yLayers, this.width - 297 + xLayers + this.textRenderer.getWidth("x" + amount), 20, GuiBase.COLOR_HORIZONTAL_BAR);
+                    RenderUtils.drawOutline(this.width + 15 + xLayers, this.y - 15 + yLayers, 22 + textRenderer.getWidth("x" + amount), 20, GuiBase.COLOR_HORIZONTAL_BAR);
                 }
 
                 if (yLayers + 20 >= this.height + 50) {
 
-                    if (xLayers - 50 >= this.width / 6) {
-
+                    if (xLayers + this.textRenderer.getWidth("x " + (int) biggest) + 55 >= (int) (scaledWidth - scaledWidth / 1.5) - scaledWidth / 6 - 1) {
                         break;
                     }
 
                     yLayers = 0;
-                    xLayers += 40;
+                    xLayers += 22 + this.textRenderer.getWidth("x " + (int) biggest);
                 }
             }
         }
@@ -534,6 +485,14 @@ public class ItemsWidget extends WidgetBase {
             xAmount += 18;
 
             this.mc.getItemRenderer().renderInGui(item, this.x - 16 + xAmount, this.y + 2 + yAmount);
+
+            if (this.x - 16 + xAmount <= mouseX && this.x - 16 + xAmount + 14 >= mouseX &&
+                    this.y + 2 + yAmount <= mouseY && this.y + 2 + yAmount + 18 >= mouseY) {
+
+                List<Text> text = new ArrayList<>();
+                text.add(item.getName());
+                screen.renderTooltip(matrixStack, text, this.x - 24 + xAmount, this.y + 2 + yAmount);
+            }
 
             if (this.searchingItem != null && this.selectedItem == null) {
 

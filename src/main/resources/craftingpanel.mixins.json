@@ -5,7 +5,7 @@
   "compatibilityLevel": "JAVA_8",
   "client": [
     "InGameHudMixin",
-    "ScreenMixin"
+    "LitematicaMixin"
   ],
   "injectors": {
     "defaultRequire": 1
